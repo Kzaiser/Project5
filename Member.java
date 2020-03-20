@@ -5,6 +5,7 @@ public class Member implements Comparable<Member> {
     public int compareTo(Member m) {
         return ID - m.ID;
     }
+    
     public Member () {
         generate();
     }
