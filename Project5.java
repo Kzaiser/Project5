@@ -1,3 +1,5 @@
+// package Project5;
+
 /*
     CMPS 3390: Java Advanced Programming
     Project 5: Hashtable
@@ -125,13 +127,13 @@ public class Project5 {
         return scanner.next().trim().charAt(0);
     }
 
-    static void printStuff(String [] stuff) { 
+    static void printStringArray(String [] stuff) { 
         for (String s : stuff) {
             System.out.println(s);
         }
     }
 
-    static void printOtherStuff(String stuff) {
+    static void printString(String stuff) {
         System.out.println(stuff);
     }
 
@@ -206,6 +208,7 @@ public class Project5 {
                 case 'i':
                 case 'X':
                 case 'x':
+                    removeWithoutShift();
                     break;
                 case 'T':
                 case 't':
@@ -221,6 +224,7 @@ public class Project5 {
                     break;
                 case 'V':
                 case 'v':
+                    verifyReachable();
                     break;
                 case 'Q':
                 case 'q':
@@ -241,9 +245,14 @@ public class Project5 {
         "|          and add them to the hash table           |
     */
     static void generateAndStore() {
-        System.out.printf("\n\t\t Input an integer and a float! (Capacity of Hash Table, Max Loading Factor)\n\t\t");
+        System.out.printf("\n\t\t Input an integer!(Capacity of Hash Table)\n\t\t");
         try {
             capacity = scanner.nextInt();
+        } catch (InputMismatchException e) {
+            return;
+        }
+        System.out.printf("\n\t\t Input an Float!(Maximum Loading Factor)\n\t\t");
+        try {
             maxLDF = scanner.nextFloat();
         } catch (InputMismatchException e) {
             return;
@@ -279,10 +288,10 @@ public class Project5 {
     }
 
     static void displayNewMember(int pos) {
-        printStuff(tableColumns);
+        printStringArray(tableColumns);
         printMember(pos);
         System.out.println(getTableParameters());
-        printOtherStuff(hyphenLine);
+        printString(hyphenLine);
     }
 
 
@@ -355,15 +364,22 @@ public class Project5 {
                 }
             }
         }
-        // printDisplacement();
+        printDisplacement();
+        printString(hyphenLine);
         return;
     }
 
+    static void printDisplacement() {
+        int total = hashTable.getTotalDisplacement();
+        float average = 1f * total / hashTable.size();
+        System.out.printf("|%.5sDisplacement:  Total = %5d  Average = %.2f%.5s|\n", spaceString, total, average, spaceString);
+    }
+
     static void printHashTable() {
-        printOtherStuff(equalLine);
-        printOtherStuff(tableTitle);
+        printString(equalLine);
+        printString(tableTitle);
         System.out.println(getTableParameters());
-        printStuff(tableColumns);
+        printStringArray(tableColumns);
     }
 
     public static boolean quit() {
@@ -375,6 +391,26 @@ public class Project5 {
             default: return quit();
         }
     }
+
+    // "+----------+--------------------------------------------------+"
+    // "|  i I x   |   Remove object at I, and do not shift.          |" 
+    // "+----------+--------------------------------------------------+"
+    
+    static void removeWithoutShift() {
+        System.out.println("\n\t\t Enter a hash code/ID for member within hash table to remove.");
+        // Retrieve Hash Code / Hash ID
+        int hashID;
+        // hashTable.display();
+        try {
+            hashID = scanner.nextInt();
+        } catch (Exception e) {
+            return;
+        }
+        System.out.printf("removed %s", hashTable.table[hashID]);
+        // Remove the object whose ID matches the given ID
+        hashTable.removeWithoutShift(hashID);
+    }
+
     // +----------+--------------------------------------------------
     //    t T    | Perform a successful search on each of object in |
     // show Time | the hash table, and 'capacity' many unsuccessful |
@@ -386,8 +422,33 @@ public class Project5 {
     // ----------+--------------------------------------------------+
 
     static void printTimeComplexityTable() {
-        printStuff(timeComplexityTable);
-        printOtherStuff(timeComplexityLine);
+        printStringArray(timeComplexityTable);
+        getTimeComplexity();
+        printString(timeComplexityLine);
+    }
+
+    static void getTimeComplexity() {
+        int successful = 0, unsuccessful = 0;
+        int size = hashTable.size();
+        int cap = hashTable.capacity();
+        float load = (float) size / cap;
+
+        
+        for (int i = 0; i < capacity; i++) {
+            if (hashTable.table[i] != null) {
+                successful += hashTable.displacement(i) + 1;
+            } else {
+                unsuccessful++;
+            }
+        }
+
+        float pracHTSucSearch = successful / size;
+        float pracHTUnSucSearch = hashTable.averageUnsuccessful(unsuccessful);
+        float theoHTSucSearch = (0.5f * (1 + 1 / (1 - load)));
+        float theoHTUnSucSearch = 0.5f * (float) (1 + 1 / Math.pow( 1 - load, 2));
+        double theoBinarySearch = Math.log(size) / Math.log(2);
+        System.out.printf("|  %.2f      |  %.2f      |  %.2f      |   %.2f     |  %.2f      |\n", 
+        pracHTSucSearch, pracHTUnSucSearch, theoHTSucSearch, theoHTUnSucSearch, theoBinarySearch);
     }
 
     // +----------+--------------------------------------------------+",
@@ -404,7 +465,7 @@ public class Project5 {
     // +----------+--------------------------------------------------+",
 
     static void dataBlocks() {
-        printStuff(blocks);
+        printStringArray(blocks);
         int first = 0;
         boolean block = hashTable.table[first] != null;
         String blockType;
@@ -416,10 +477,12 @@ public class Project5 {
         int i = first;
         do {
             block = hashTable.table[i] != null;
+
             int start = i;
             int end = start;
             int size = 1;
             i = (i + 1) % hashTable.capacity();
+
             while(block == (hashTable.table[i] != null)) {
                 end = (end + 1) % hashTable.capacity();
                 i = (i + 1) % hashTable.capacity();
@@ -454,6 +517,7 @@ public class Project5 {
                 }
             }
         } while (i != first);
+
         System.out.println(blockEqualLine);
         System.out.println(blockLabels);
         System.out.println(blockHyphenLine);
@@ -476,13 +540,48 @@ public class Project5 {
         float increment = hashTable.increment();
         float currentLoadingFactor = 1f * size / cap;
                                 
-        return String.format("|Cap:%5d|Size:%5d|maxLDF:%.2f|IncP:%.2f|curLDF:%.1f |", cap, size, maxLoadingFactor, currentLoadingFactor, increment);
+        return String.format("| Cap:%5d | Size:%5d | maxLDF:%.2f | IncP:%.2f | curLDF:%.1f |\n", cap, size, maxLoadingFactor, currentLoadingFactor, increment);
     }
 
     static void printTableParameters() {
-        printStuff(parameterTitle);
-        printStuff(parameterLabels);
-        printOtherStuff(getTableParameters());
-        printOtherStuff(parameterHyphenLine);
+        printStringArray(parameterTitle);
+        printStringArray(parameterLabels);
+        printString(getTableParameters());
+        printString(timeComplexityLine);
+    }
+
+    // +----------+--------------------------------------------------+
+    // +   v V    |    Verify whether all non-null elements in table |
+    // |          |         are rearchable or not.                   |
+    // +----------+--------------------------------------------------+
+
+    static void verifyReachable() {
+        int misses = 0;
+        int cap = hashTable.capacity();
+        int i = 0;
+        while (i < cap) {
+            if(hashTable.table[i] != null) {
+                int hashID = (hashTable.table[i].hashCode()) % cap;
+                System.out.printf("%d: Hash Key = %d ", i , hashID);
+                int result;
+        
+                // while(hashTable.table[hashID] != null) {
+                //     hashID = (hashID + 1) % capacity;
+                // }
+                if (hashTable.table[hashID] != null) {
+                    result = -1;
+                } else {
+                    result = hashID;
+                }
+                System.out.printf("result = %d\t", result);
+                if(result == -1) {
+                    misses++;
+                    System.out.printf("Count not reach %d", i);
+                }
+                System.out.println();
+            }
+            i++;
+        }
+        System.out.printf("Number of Misses = %d\n", misses);
     }
 }

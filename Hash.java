@@ -86,7 +86,7 @@ public class Hash <T extends Comparable<T>> {
 
     public T remove(int hashCode) {
         int location = find( hashCode );
-        System.out.println("This is the location:" + location);
+        // System.out.println("This is the location:" + location);
         if (location < 0) {
             return null; // nothing has been found, return null.
         }
@@ -97,7 +97,20 @@ public class Hash <T extends Comparable<T>> {
         return o; // return the object to display
     }
 
-    int find ( T obj ) {
+    public T removeWithoutShift(int hashCode) {
+        int location = find( hashCode );
+        // System.out.println("This is the location:" + location);
+        if (location < 0) {
+            return null; // nothing has been found, return null.
+        }
+        T o = table[location];
+        table[location] = null;
+        // shift ( location ); // shift objects up if required.
+        size --;
+        return o; // return the object to display
+    }
+
+    public int find ( T obj ) {
         // return find(obj.hashCode() );
         int location = hash(obj.hashCode()); // start at home location
         while (table[location] != null && table[location].compareTo(obj) != 0) {
@@ -106,16 +119,17 @@ public class Hash <T extends Comparable<T>> {
         return table[location] == null ? -1 : location;
     }
 
-    int find (int hCode) {
+    public int find (int hCode) {
         int location = hash(hCode);
         // TO DO:
 
         // not working when using the second part of the while loop
         // while ( table[location] != null && table[location].hashCode() != hCode) {
 
-        while(table[location] == null) {
+        while(table[location] != null) {
             location = (location + 1) % capacity;
         }
+        System.out.print(table[location]);
         return table[location] == null ? -1 : location;
     }
 
@@ -145,10 +159,10 @@ public class Hash <T extends Comparable<T>> {
     }
 
     // hash: return key's home address
-    protected int hash(int hashCode) { 
+    public int hash(int hashCode) { 
         return hashCode % capacity;
     } 
-    protected int hash(T obj) { return obj.hashCode() % capacity; }
+    public int hash(T obj) { return obj.hashCode() % capacity; }
 
     protected void rehash() {
         // create  temporary array
@@ -180,7 +194,7 @@ public class Hash <T extends Comparable<T>> {
 
 
     // distance function
-    protected int displacement(int home, int location) {
+    public int displacement(int home, int location) {
         if (table[location] == null) {
             return -1;
         }
@@ -189,7 +203,7 @@ public class Hash <T extends Comparable<T>> {
 
     }
 
-    protected int displacement(int location) {
+    public int displacement(int location) {
         T obj = table[location];
         int home = hash(obj);
         return displacement(home,location);
@@ -207,7 +221,7 @@ public class Hash <T extends Comparable<T>> {
         return count;
     }
 
-    protected float averageUS(int cntUns) {
+    protected float averageUnsuccessful(int cntUns) {
         int total = 0, loopCnt, k = cntUns;
         Member m = new Member();
 
