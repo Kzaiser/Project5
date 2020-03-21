@@ -2,24 +2,15 @@ import java.util.*;
 import java.util.Arrays;
 import java.lang.reflect.Array;
 
-/*
-public class HashTable< T extends Comparable><T>> {
-    private int size = 0;
-    print int capacity;
-    private float maxldf;
-}
-*/
-
 @SuppressWarnings("unchecked")
 
 public class Hash <T extends Comparable<T>> {
     protected Class<T> elementType;
     protected int size = 0, capacity = 10;
     protected float loadingFactor = 0.75f, increment = 0.2f;
-    protected T table[];
+    public T table[];
 
     // private float maxLDF = 0.8f;
-    // private int tbl[] = new int[capacity];
     static int NOOBJ = -1;
 
     /**
@@ -32,12 +23,6 @@ public class Hash <T extends Comparable<T>> {
      * specified loading factor is reached.
      */
 
-    // // Default Constructor
-    // public Hash ( ) {
-    //     for(int i = 0; i < capacity; i++) {
-    //         tbl[i] = NOOBJ;
-    //     }
-    // }
     public Hash(Class<T> type, int cap, float loadFact, float inc) {
         init(type, cap, loadFact, inc);
     }
@@ -60,21 +45,13 @@ public class Hash <T extends Comparable<T>> {
         loadingFactor = loadFact;
         size = 0;
         increment = inc;
-        table = (T[]) Array.newInstance(Type, cap);
+        table = (T[]) Array.newInstance(elementType, capacity);
     }
-
-    // // Copy Constructor 
-    // public Hash (Hash hashTable) {
-    //     for(int i = 0; i < hashTable.capacity; i++) {
-    //        tbl[i] = hashTable.tbl[i];
-    //     }
-    // }
-
 
     // Hash <T> add(T obj) {}
     public Hash<T> add(T obj) {
         if (obj == null) {
-            return this; // don't add if empty.
+            return null; // don't add if empty.
         }
         int home = hash(obj.hashCode() % capacity);
         while(table[home] != null) {
@@ -88,16 +65,16 @@ public class Hash <T extends Comparable<T>> {
         return this;
     }
 
-    public void display() {
-        for(int i = 0; i < table.length; i++) {
-            System.out.println(table[i]);
-        }
-        System.out.println("\n");
-    }
+    // public void display() {
+    //     for(int i = 0; i < table.length; i++) {
+    //         System.out.println(table[i]);
+    //     }
+    //     System.out.println("\n");
+    // }
 
-    public T displaySingleValue(int loc) {
-        return table[loc];
-    }
+    // public T displaySingleValue(int loc) {
+    //     return table[loc];
+    // }
 
         // public Hash remove(int key) {
         //     int addr = find(key);
@@ -171,6 +148,7 @@ public class Hash <T extends Comparable<T>> {
     protected int hash(int hashCode) { 
         return hashCode % capacity;
     } 
+    protected int hash(T obj) { return obj.hashCode() % capacity; }
 
     protected void rehash() {
         // create  temporary array
@@ -202,13 +180,31 @@ public class Hash <T extends Comparable<T>> {
 
 
     // distance function
-    protected int displacement(int location ) {
+    protected int displacement(int home, int location) {
         if (table[location] == null) {
             return -1;
         }
-        int home = hash(table[location].hashCode() );
+        // int home = hash(table[location].hashCode() );
         return home <= location ? location - home : capacity - home + location;
 
+    }
+
+    protected int displacement(int location) {
+        T obj = table[location];
+        int home = hash(obj);
+        return displacement(home,location);
+    }
+
+    protected int getTotalDisplacement() {
+        int count = 0;
+        int i = 0;
+        while (i < capacity) {
+            if (table[i] != null) {
+                count += displacement(i);
+            }
+            i++;
+        }
+        return count;
     }
 
     protected float averageUS(int cntUns) {
